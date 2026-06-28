@@ -1,4 +1,4 @@
-# 🧬 BioSequenceAnalyzer
+#  BioSequenceAnalyzer
 
 A full-stack bioinformatics desktop application for analyzing DNA, RNA, and Protein sequences.
 

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.bioanalyzer.controller.MainController"
+            styleClass="root-pane">
+
+    <!-- HEADER -->
+    <top>
+        <HBox styleClass="header-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="24" bottom="14" left="24"/></padding>
+            <Label text="🧬" style="-fx-font-size: 30px;"/>
+            <VBox spacing="2">
+                <Label text="BioSequenceAnalyzer" styleClass="app-title"/>
+                <Label text="DNA · RNA · Protein Analysis · Mutation Detection · ORF Finder · Translation"
+                       styleClass="app-subtitle"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <VBox alignment="CENTER_RIGHT" spacing="2">
+                <Label text="Server Status" styleClass="section-label"/>
+                <Label fx:id="backendStatusLabel" text="⏳ Checking..." styleClass="status-badge"/>
+            </VBox>
+        </HBox>
+    </top>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <HBox spacing="0">
+
+            <!-- LEFT PANEL -->
+            <VBox styleClass="left-panel" spacing="14" prefWidth="310" minWidth="260">
+                <padding><Insets top="16" right="14" bottom="16" left="16"/></padding>
+
+                <!-- Summary stats -->
+                <HBox styleClass="mini-stats-bar" spacing="0">
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" styleClass="mini-stat">
+                        <Label fx:id="labelLength" text="0" styleClass="mini-stat-num"/>
+                        <Label text="Length" styleClass="mini-stat-lbl"/>
+                    </VBox>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" styleClass="mini-stat">
+                        <Label fx:id="labelType" text="-" styleClass="mini-stat-num-cyan"/>
+                        <Label text="Type" styleClass="mini-stat-lbl"/>
+                    </VBox>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" styleClass="mini-stat">
+                        <Label fx:id="labelGC" text="-" styleClass="mini-stat-num-green"/>
+                        <Label text="GC" styleClass="mini-stat-lbl"/>
+                    </VBox>
+                    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" styleClass="mini-stat">
+                        <Label fx:id="labelMW" text="-" styleClass="mini-stat-num-yellow"/>
+                        <Label text="MW" styleClass="mini-stat-lbl"/>
+                    </VBox>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Sequence type selector -->
+                <Label text="🔬 Sequence Type" styleClass="section-header"/>
+                <ComboBox fx:id="seqTypeCombo" maxWidth="Infinity" styleClass="filter-combo"/>
+                <Label fx:id="detectedTypeLabel" text="" styleClass="section-hint"/>
+
+                <!-- Sequence input -->
+                <Label text="📝 Enter Sequence" styleClass="section-header"/>
+                <Label text="Paste DNA, RNA, or Protein sequence:" styleClass="section-hint"/>
+                <TextArea fx:id="sequenceInput"
+                          promptText="ATGCGATCGATCG...  or  MKTAYIAK..."
+                          styleClass="peptide-input"
+                          prefHeight="160"
+                          wrapText="true"/>
+
+                <!-- Sample buttons -->
+                <Label text="💡 Load Sample:" styleClass="section-hint"/>
+                <HBox spacing="4">
+                    <Button text="DNA" styleClass="sample-btn-dna" onAction="#onLoadDNASample" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button text="RNA" styleClass="sample-btn-rna" onAction="#onLoadRNASample" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button text="Protein" styleClass="sample-btn-prot" onAction="#onLoadProteinSample" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                </HBox>
+
+                <Separator/>
+
+                <!-- Action buttons -->
+                <Button fx:id="analyzeButton" text="🔍 Analyze Sequence"
+                        styleClass="primary-button"
+                        onAction="#onAnalyzeClicked"
+                        maxWidth="Infinity" prefHeight="42"/>
+
+                <HBox spacing="8">
+                    <Button fx:id="clearButton" text="🗑 Clear"
+                            styleClass="danger-button"
+                            onAction="#onClearClicked"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button fx:id="exportButton" text="💾 Export CSV"
+                            styleClass="success-button"
+                            onAction="#onExportClicked"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            disable="true"/>
+                </HBox>
+
+            </VBox>
+
+            <Separator orientation="VERTICAL"/>
+
+            <!-- RIGHT PANEL -->
+            <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+                <!-- Tab Pane -->
+                <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS" styleClass="main-tabs">
+
+                    <!-- TAB 1: Analysis Results -->
+                    <Tab text="📊 Analysis Results" closable="false">
+                        <VBox spacing="0">
+                            <TableView fx:id="resultsTable"
+                                       styleClass="results-table"
+                                       VBox.vgrow="ALWAYS"
+                                       prefHeight="340">
+                                <columns>
+                                    <TableColumn fx:id="colProperty"    text="Property"     prefWidth="200"/>
+                                    <TableColumn fx:id="colValue"       text="Value"        prefWidth="220"/>
+                                    <TableColumn fx:id="colDescription" text="Description"  prefWidth="280"/>
+                                    <TableColumn fx:id="colCategory"    text="Category"     prefWidth="90"/>
+                                </columns>
+                            </TableView>
+
+                            <!-- Sequence output area -->
+                            <Label text="Full Sequence Output:" styleClass="section-header"
+                                   style="-fx-padding: 8 0 4 12;"/>
+                            <TextArea fx:id="sequenceOutputArea"
+                                      styleClass="peptide-input"
+                                      prefHeight="140"
+                                      editable="false"
+                                      wrapText="true"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- TAB 2: Mutation Detection -->
+                    <Tab text="🔬 Mutation Detection" closable="false">
+                        <VBox spacing="12">
+                            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+                            <Label text="Compare two sequences to find mutations, insertions, and deletions:"
+                                   styleClass="section-hint" wrapText="true"/>
+
+                            <Button text="Load Sample Sequences" styleClass="secondary-button"
+                                    onAction="#onLoadMutationSample" maxWidth="Infinity"/>
+
+                            <Label text="Reference Sequence (Original):" styleClass="section-header"/>
+                            <TextArea fx:id="seq1Input"
+                                      promptText="ATGCGATCGATCGGCTAGC..."
+                                      styleClass="peptide-input"
+                                      prefHeight="120" wrapText="true"/>
+
+                            <Label text="Query Sequence (Mutated):" styleClass="section-header"/>
+                            <TextArea fx:id="seq2Input"
+                                      promptText="ATGCGATCGATCGGCTAGC..."
+                                      styleClass="peptide-input"
+                                      prefHeight="120" wrapText="true"/>
+
+                            <Button fx:id="mutationButton"
+                                    text="🧬 Detect Mutations"
+                                    styleClass="primary-button"
+                                    onAction="#onMutationClicked"
+                                    maxWidth="Infinity" prefHeight="42"/>
+
+                            <Label text="Results will appear in the Analysis Results tab."
+                                   styleClass="section-hint"/>
+                        </VBox>
+                    </Tab>
+
+                    <!-- TAB 3: Charts -->
+                    <Tab text="📈 Charts" closable="false">
+                        <HBox spacing="0">
+                            <BarChart fx:id="compositionChart"
+                                      HBox.hgrow="ALWAYS"
+                                      styleClass="binding-chart"
+                                      animated="true">
+                                <xAxis><CategoryAxis fx:id="compXAxis"/></xAxis>
+                                <yAxis><NumberAxis fx:id="compYAxis"/></yAxis>
+                            </BarChart>
+                            <Separator orientation="VERTICAL"/>
+                            <PieChart fx:id="distributionPie"
+                                      prefWidth="320"
+                                      styleClass="binder-pie-chart"
+                                      animated="true"
+                                      labelsVisible="true"/>
+                        </HBox>
+                    </Tab>
+
+                </TabPane>
+
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- FOOTER STATUS BAR -->
+    <bottom>
+        <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="8" right="20" bottom="8" left="20"/></padding>
+            <Label fx:id="statusLabel"
+                   text="Ready. Enter a sequence and click Analyze."
+                   styleClass="status-text" HBox.hgrow="ALWAYS"/>
+            <ProgressBar fx:id="progressBar" progress="0" prefWidth="200" styleClass="progress"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
